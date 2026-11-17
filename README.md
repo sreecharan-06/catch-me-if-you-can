@@ -1,6 +1,8 @@
 # 🏃‍♂️💨 Catch Me If You Can!
 
 > **A hilarious, high-energy arcade evasion browser game where the button runs away from your cursor!** Built with pure HTML5, CSS3, and modern vanilla JavaScript.
+> 
+> 🔗 **Live Demo:** [https://sreecharan-06.github.io/catch-me-if-you-can/](https://sreecharan-06.github.io/catch-me-if-you-can/)
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
@@ -127,7 +129,7 @@ No build steps, node modules, or bundlers required!
 ### Option 1: Double-Click to Run
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/your-username/catch-me-if-you-can.git
+   git clone https://github.com/sreecharan-06/catch-me-if-you-can.git
    ```
 2. Navigate into the project folder:
    ```bash
@@ -166,7 +168,7 @@ Because this project is 100% static client-side code, deploying to GitHub Pages 
    git add .
    git commit -m "Initial commit: Catch Me If You Can arcade game"
    git branch -M main
-   git remote add origin https://github.com/your-username/catch-me-if-you-can.git
+   git remote add origin https://github.com/sreecharan-06/catch-me-if-you-can.git
    git push -u origin main
    ```
 
@@ -179,7 +181,7 @@ Because this project is 100% static client-side code, deploying to GitHub Pages 
 
 4. **Play Your Live Game**:
    - Wait 30–60 seconds. Your live URL will appear at:
-     `https://your-username.github.io/catch-me-if-you-can/`
+     `https://sreecharan-06.github.io/catch-me-if-you-can/`
 
 ---
 

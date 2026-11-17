@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Catch Me If You Can - A hilarious, fast-paced arcade browser game where the button runs away from your cursor!" />
+  <meta name="theme-color" content="#121324" />
+  <title>Catch Me If You Can! 🏃‍♂️💨 An Arcade Evasion Game</title>
+
+  <!-- Google Fonts: Bungee & Fredoka for vibrant arcade vibes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Main Game Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Favicon Emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😜</text></svg>" />
+</head>
+<body>
+  <!-- Ambient Background Glows & Grid -->
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+  <div class="arcade-grid" aria-hidden="true"></div>
+
+  <!-- Particle / Confetti Canvas -->
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+  <div class="game-wrapper">
+    <!-- Header Section -->
+    <header class="game-header">
+      <div class="title-container">
+        <h1 class="game-title">
+          <span class="word word-catch">CATCH</span>
+          <span class="word word-me">ME</span>
+          <span class="word word-if">IF YOU</span>
+          <span class="word word-can">CAN!</span>
+          <span class="title-emoji" id="titleEmoji">🏃‍♂️💨</span>
+        </h1>
+        <p class="game-tagline">The button that has personal space issues. Can you catch it?</p>
+      </div>
+
+      <!-- Quick Audio & Help Buttons -->
+      <div class="top-controls">
+        <button id="soundToggleBtn" class="pill-btn" aria-label="Toggle sound effects" title="Toggle Sound">
+          <span class="btn-icon" id="soundIcon">🔊</span>
+          <span class="btn-text" id="soundText">Sound ON</span>
+        </button>
+        <button id="helpBtn" class="pill-btn" aria-label="How to play" title="How to Play">
+          <span class="btn-icon">❓</span>
+          <span class="btn-text">Rules</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scoreboard & Stats Bar -->
+    <section class="scoreboard-section" aria-label="Game Stats">
+      <div class="stat-card stat-score">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-content">
+          <span class="stat-label">SCORE</span>
+          <span class="stat-value" id="scoreDisplay">0</span>
+        </div>
+        <div class="score-sparkle" id="scoreSparkle">+100</div>
+      </div>
+
+      <div class="stat-card stat-timer" id="timerCard">
+        <div class="stat-icon" id="timerIcon">⏳</div>
+        <div class="stat-content">
+          <span class="stat-label">TIME LEFT</span>
+          <span class="stat-value" id="timerDisplay">60<small>s</small></span>
+        </div>
+        <!-- Progress bar for 60s countdown -->
+        <div class="timer-bar-container">
+          <div class="timer-bar" id="timerBar"></div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-highscore">
+        <div class="stat-icon">👑</div>
+        <div class="stat-content">
+          <span class="stat-label">HIGH SCORE</span>
+          <span class="stat-value" id="highScoreDisplay">0</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-streak">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-content">
+          <span class="stat-label">COMBO / ESCAPES</span>
+          <span class="stat-value combo-text" id="comboDisplay">
+            <span id="streakCount">0x</span> / <span id="escapesDisplay">0</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Difficulty & Mode Control Bar -->
+    <nav class="difficulty-bar" aria-label="Select Game Difficulty">
+      <span class="diff-title">Difficulty:</span>
+      <div class="difficulty-pills" role="radiogroup" aria-label="Difficulty levels">
+        <button class="diff-btn" data-difficulty="easy" role="radio" aria-checked="false">
+          <span class="diff-dot easy"></span> Easy (Chill)
+        </button>
+        <button class="diff-btn active" data-difficulty="medium" role="radio" aria-checked="true">
+          <span class="diff-dot medium"></span> Medium (Spicy)
+        </button>
+        <button class="diff-btn" data-difficulty="hard" role="radio" aria-checked="false">
+          <span class="diff-dot hard"></span> Hard (Chaos)
+        </button>
+      </div>
+      <div class="speed-badge" id="speedBadge">
+        Speed: <span id="speedValue">1.0x</span>
+      </div>
+    </nav>
+
+    <!-- Main Game Arena -->
+    <main class="arena-container">
+      <div id="gameArena" class="game-arena" role="region" aria-label="Catch the button arena">
+        
+        <!-- Live Floating Taunt / Speech Bubble -->
+        <div id="tauntBubble" class="taunt-bubble" aria-live="polite">
+          <span class="bubble-arrow"></span>
+          <span class="bubble-emoji" id="bubbleEmoji">😜</span>
+          <span class="bubble-text" id="bubbleText">You can't catch me!</span>
+        </div>
+
+        <!-- The Elusive Runner Button -->
+        <button id="runnerBtn" class="runner-btn" aria-label="Target button: Catch me if you can!" tabindex="0">
+          <span class="runner-glow"></span>
+          <span class="runner-emoji" id="runnerEmoji">😜</span>
+          <span class="runner-text" id="runnerText">CATCH ME!</span>
+        </button>
+
+        <!-- Arena Overlay / Watermark when not active -->
+        <div id="arenaOverlay" class="arena-overlay">
+          <div class="overlay-content">
+            <div class="overlay-emoji-row">
+              <span class="bounce-emoji">🕹️</span>
+              <span class="bounce-emoji delay-1">⚡</span>
+              <span class="bounce-emoji delay-2">💨</span>
+            </div>
+            <h2 id="overlayTitle">Ready for the Chase?</h2>
+            <p id="overlayDesc">The button will dodge as your mouse or finger nears it. Click it to score!</p>
+            <button id="overlayStartBtn" class="arcade-action-btn pulse-glow">
+              <span class="btn-play-icon">▶</span> START GAME
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating click feedback message template target -->
+        <div id="clickFeedbackContainer" class="feedback-container" aria-hidden="true"></div>
+      </div>
+    </main>
+
+    <!-- Action Controls Toolbar -->
+    <footer class="action-toolbar">
+      <button id="startBtn" class="control-btn primary-btn">
+        <span class="icon">▶</span>
+        <span class="label">START</span>
+      </button>
+
+      <button id="pauseBtn" class="control-btn warning-btn" disabled>
+        <span class="icon">⏸</span>
+        <span class="label">PAUSE</span>
+      </button>
+
+      <button id="restartBtn" class="control-btn danger-btn">
+        <span class="icon">🔄</span>
+        <span class="label">RESTART</span>
+      </button>
+    </footer>
+
+    <!-- Helpful Hints & Live Taunt Marquee -->
+    <div class="taunt-ticker" aria-hidden="true">
+      <span class="ticker-label">LATEST ROAST:</span>
+      <div class="ticker-viewport">
+        <span class="ticker-text" id="tickerText">"My grandmother's toaster moves faster than your cursor!" 🍞⚡</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal Dialog -->
+  <div id="gameOverModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-banner" id="modalBanner">
+        <span class="banner-sparkle left">✨</span>
+        <span id="modalBannerText">TIME'S UP!</span>
+        <span class="banner-sparkle right">✨</span>
+      </div>
+
+      <div class="modal-avatar" id="modalAvatar">🏆</div>
+
+      <h2 id="modalTitle" class="modal-title">Game Over!</h2>
+      <p id="modalRank" class="modal-rank">Reflex Ninja</p>
+      <p id="modalQuote" class="modal-quote">"Not terrible, but my cat could still outrun you!"</p>
+
+      <!-- Stats Grid -->
+      <div class="modal-stats-grid">
+        <div class="mstat-item">
+          <span class="mstat-label">Final Score</span>
+          <span class="mstat-val highlight" id="modalFinalScore">0</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-label">Difficulty</span>
+          <span class="mstat-val" id="modalDifficulty">Medium</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-label">Successful Catches</span>
+          <span class="mstat-val" id="modalCatches">0</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-label">Escapes</span>
+          <span class="mstat-val" id="modalEscapes">0</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-label">Catch Accuracy</span>
+          <span class="mstat-val" id="modalAccuracy">0%</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-label">High Score</span>
+          <span class="mstat-val crown" id="modalHighScore">0</span>
+        </div>
+      </div>
+
+      <!-- New High Score Alert Badge -->
+      <div id="newHighScoreBadge" class="new-high-badge hidden">
+        🎉 NEW HIGH SCORE RECORD! 🎉
+      </div>
+
+      <!-- Modal Action Buttons -->
+      <div class="modal-buttons">
+        <button id="modalPlayAgainBtn" class="arcade-action-btn pulse-glow">
+          <span>🔄</span> Play Again
+        </button>
+        <button id="shareScoreBtn" class="pill-btn share-btn" title="Copy score to clipboard">
+          <span>📋</span> Share Score
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Play Rules Modal -->
+  <div id="rulesModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="modal-card rules-card">
+      <button id="closeRulesBtn" class="modal-close" aria-label="Close rules">✕</button>
+      <h2 id="rulesTitle" class="modal-title">🎮 How to Play</h2>
+
+      <div class="rules-list">
+        <div class="rule-item">
+          <div class="rule-icon">🏃‍♂️</div>
+          <div class="rule-body">
+            <strong>The Button Runs:</strong> As your cursor or finger approaches the button, it detects you and sprints away!
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">🎯</div>
+          <div class="rule-body">
+            <strong>Sneak & Click:</strong> Predict its movement, corner it, or click fast before it detects you to score points.
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">⚡</div>
+          <div class="rule-body">
+            <strong>Speed Acceleration:</strong> Every escape makes it faster, bolder, and more confident.
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">🔥</div>
+          <div class="rule-body">
+            <strong>Combo Multipliers:</strong> Quick consecutive catches trigger combo point bonuses!
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon">⏱️</div>
+          <div class="rule-body">
+            <strong>60-Second Blitz:</strong> You have 60 seconds. Set your best record and laugh along the way!
+          </div>
+        </div>
+      </div>
+
+      <button id="rulesGotItBtn" class="arcade-action-btn" style="margin-top: 1.2rem; width: 100%;">
+        Got It! Let's Chase 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-popup" aria-live="assertive"></div>
+
+  <!-- Main Game Script -->
+  <script src="script.js"></script>
+</body>
+</html>
